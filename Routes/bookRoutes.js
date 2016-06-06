@@ -4,7 +4,7 @@ var bookRouter = express.Router();
 
 var routes = function(Book){
     
-    bookRouter.route('/')
+bookRouter.route('/')
   .post(function(req,res){
     var book = new Book(req.body);
     book.save();
@@ -80,6 +80,15 @@ bookRouter.route('/:bookId')
         }            
       });      
      
+  })
+  .delete(function(req,res){
+      req.book.remove(function(err){
+          if(err){
+              res.status(500).send(err);
+          }else{
+              res.status(204).send('Removed');
+          }
+      });
   });
 return bookRouter;
 };
