@@ -4,7 +4,7 @@ var bookRouter = express.Router();
 
 var routes = function(Book){
     
-    bookRouter.route('/Books')
+    bookRouter.route('/')
   .post(function(req,res){
     var book = new Book(req.body);
     book.save();
@@ -29,16 +29,57 @@ var routes = function(Book){
       })
   });
 
-bookRouter.route('/Books/:bookId')
+bookRouter.use('/:bookId',function(req,res,next){
+   Book.findById(req.params.bookId, function(err,book){
+       if(err){
+           res.status(500).send(err);
+       }else if(book){
+           req.book = book;
+           next();
+       }else{
+           res.status(404).send('no book found');
+       }
+   }) 
+});
+bookRouter.route('/:bookId')
   .get(function(req,res){
            
-      Book.findById(req.params.bookId, function(error,book){
-          if(error){
-              console.log(error);
-          }else{
-               res.json(book);        
-          }
-      })
+      res.json(req.book);
+  })
+  .put(function(req,res){
+    book.title = req.body.title;
+    book.author = req.body.autor;
+    book.genre = req.body.genre;
+    book.read = req.body.read;
+    
+    req.book.save(function(err){
+        if(err){
+            res.status(500).send(err);
+        }else{
+            res.json(req.book);
+        }            
+    });
+            
+  })
+  .patch(function(req,res){
+      
+      if(req.body._id){
+          delete req.body._id;
+      }
+      
+      for(var key in req.body){
+          
+          req.book[key] = req.body[key];
+      }
+        
+      req.book.save(function(err){
+        if(err){
+            res.status(500).send(err);
+        }else{
+            res.json(req.book);
+        }            
+      });      
+     
   });
 return bookRouter;
 };
