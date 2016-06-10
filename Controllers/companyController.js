@@ -84,6 +84,8 @@ var patch = function(req,res){
         if(err){
             res.status(500).send(err);
         }else{
+            //res.setHeader("Access-Control-Allow-Origin", "*");
+            //res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With");
             res.json(req.company);
         }            
       });      

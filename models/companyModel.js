@@ -2,56 +2,56 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var companyModel = new Schema({
-   number:{
+   compcode:{
       type:String    
    },
-   name:{
+   compname:{
       type:String    
    },
-   address:{
+   compaddr:{
       type:String    
    },
-   telephone:{
+   comptele:{
       type:String    
    },
-   fax:{
+   compfax:{
       type:String    
    },
-   email:{
+   compemail:{
       type:String    
    },
-   logo:{
+   complogo:{
       type:String    
    },
-   contact:{
+   compcontact:{
       type:String    
    },
-   taxNumber:{
+   taxno:{
       type:String    
    },
-   tccNumber:{
+   tccno:{
       type:String    
    },
-   trnNumber:{
+   trnno:{
       type:String    
    }
    ,
-   shortPaymentVariance:{
+   lrcpvariance:{
       type:String    
    },
-   excessPaymentVariance:{
+   uprcpvariance:{
       type:String    
    },
-   lastReceiptNumber:{
+   lrcpno:{
       type:String    
    },
-   lastInvoiceNumber:{
+   linvno:{
       type:String    
    },
-   lastGatePassNumber:{
+   lgpno:{
       type:String    
    },
-   lastCreditNoteNumber:{
+   lcdnno:{
       type:String    
    }
 });
