@@ -6403,7 +6403,7 @@ function ajaxRequest(pgm,urlp,json,requestType){
     
     if (requestType=="POST") {
         
-      xmlHttp.open("POST",pgm, dontwait);
+      xmlHttp.open("POST",pgm,dontwait);
       
       xmlHttp.onreadystatechange = function(){
           
@@ -6419,7 +6419,6 @@ function ajaxRequest(pgm,urlp,json,requestType){
       
       xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       xmlHttp.send(JSON.stringify(json));
-      xmlHttp.send(urlp);
     }
     
     
@@ -6441,7 +6440,7 @@ function ajaxRequest(pgm,urlp,json,requestType){
         
       xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*");
       xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-      xmlHttp.send(JSON.stringify({json}));
+      xmlHttp.send(JSON.stringify(json));
     }
  }
  catch (e){

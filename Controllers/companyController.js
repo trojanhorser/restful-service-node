@@ -3,8 +3,7 @@ var companyController = function(Company){
     var post = function(req,res){
         var company = new Company(req.body);
         company.save();
-       
-        //Status 201 means created
+
         res.status(201).send(company);
     }
     
@@ -31,6 +30,7 @@ var companyController = function(Company){
        if(err){
            res.status(500).send(err);
        }else if(company){
+           console.log(company)
            req.company = company;
            next();
        }else{
@@ -44,22 +44,25 @@ var getById = function(req,res){
 }
 
 var update = function(req,res){
-    req.company.companyNumber = req.body.companyNumber;
-    req.company.name = req.body.name;
-    req.company.address = req.body.address;
-    req.company.telephone = req.body.telephone;
-    req.company.fax = req.body.email;
-    req.company.logo = req.body.contact;
-     req.company.tccNumber = req.body.tccNumber;
-    req.company.trnNumber = req.body.trnNumber;
-    req.company.shortPaymentVariance = req.body.shortPaymentVariance;
-    req.company.excessPaymentVariance = req.body.excessPaymentVariance;
-    req.company.lastReceiptNumber = req.body.lastReceiptNumber;
-    req.company.lastInvoiceNumber = req.body.lastInvoiceNumber;
-    req.company.lastGatePassNumber = req.body.lastGatePassNumber;
-    req.company.lastCreditNoteNumber = req.body.lastCreditNoteNumber;
-  
-    req.company.save(function(err){
+    req.company.compcode = req.body.json.compcode;
+    req.company.compname = req.body.json.compname;
+    req.company.compaddr = req.body.json.compaddr;
+    req.company.comptele = req.body.json.comptele;
+    req.company.compfax = req.body.json.compfax;
+    req.company.compemail = req.body.json.compemail;
+    req.company.complogo = req.body.json.complogo;
+    req.company.compcontact = req.body.compcontact;
+    req.company.taxno = req.body.json.taxno;
+    req.company.tccno = req.body.json.tccno;
+    req.company.trnno = req.body.json.trnno;
+    req.company.lrcpvariance = req.body.json.lrcpvariance;
+    req.company.uprcpvariance = req.body.json.uprcpvariance;
+    req.company.lrcpno = req.body.json.lrcpno;
+    req.company.linvno = req.body.json.linvno;
+    req.company.lgpno = req.body.json.lgpno;
+    req.company.lcdnno = req.body.json.lcdnno;
+   
+       req.company.save(function(err){
         if(err){
             res.status(500).send(err);
         }else{
@@ -75,9 +78,8 @@ var patch = function(req,res){
           delete req.body._id;
       }
       
-      for(var key in req.body.json){
-          console.log(req.body.json[key]);
-          req.company[key] = req.body.json[key];     
+      for(var key in req.body){
+          req.company[key] = req.body[key];     
       }
      
       req.company.save(function(err){

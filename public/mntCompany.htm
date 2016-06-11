@@ -11,7 +11,7 @@
 
 <script>
 function loadUp() {
-
+hideElement('uniqueid');
 changemode=false;
 savedata='';
 lastcrow=-1;
@@ -62,7 +62,8 @@ function getRecord() {
  
   var company = JSON.parse(ajaxresponse)[0];
   
- 
+
+  changeVar('uniqueid',company._id);
   changeVar('compcode',edit(numeric(company.compcode),0,'J'));
   changeVar('compname',company.compname);  
   changeVar('compaddr',company.compaddr);
@@ -236,27 +237,46 @@ function validData1() {
 
 function doAdd() {
   if (!validData1()) return false;
-  var $updobj= new sqlUpdateObj('*form:dataform');
-  if (sqlInsert('company', $updobj)) {
-     newRow('table1');
-     updateTable1();
-     positionRow();
-     hideElement('bottomrightdata');
-     return true;
+ 
+  var company = {
+    "compcode": valueOf("compcode"),
+    "compname": valueOf("compname"),
+    "compaddr": valueOf("compaddr"),
+    "comptele": valueOf("comptele"),
+    "compfax": valueOf("compfax"),
+    "compemail": valueOf("compemail"),
+    "complogo": valueOf("complogo"),
+    "compcontact": valueOf("compcontact"),
+    "taxno": valueOf("taxno"),
+    "tccno": valueOf("tccno"),
+    "trnno": valueOf("trnno"),
+    "lrcpvariance": valueOf("lrcpvariance"),
+    "uprcpvariance": valueOf("uprcpvariance"),
+    "lrcpno": valueOf("lrcpno"),
+    "linvno": valueOf("linvno"),
+    "lgpno": valueOf("lgpno"),
+    "lcdnno":valueOf("lcdnno")
   }
-  else {
-     alarm('Error..'+sqlerr);
-     return false;
-  }
+  
+  var ajaxresponse = ajaxRequest("http://localhost:5000/api/company","",company,"POST");
+  
+  createTableFromJsonRequest();
 }
 
 function doChange() {
+  
   if (!savedata.hasChangedVar()) {
       return true;
   }
+  
   if (!validData1()) return;
+  
+  var uniqueid = valueOf("uniqueid");
+  
   var company = savedata.returnChangedVar();
-  var ajaxresponse = ajaxRequest("http://localhost:5000/api/company/575aeae12bdc68fc456bb2f8","",company,"PATCH");  
+  
+  var ajaxresponse = ajaxRequest("http://localhost:5000/api/company/"+uniqueid,"",company,"PATCH");  
+  
   createTableFromJsonRequest();
 }
 
@@ -355,6 +375,7 @@ function updateTable1() {
            <span field=lgpno></span>
           </td></tr><tr><td>
            <span field=lcdnno></span>
+           <span field=uniqueid length=24></span>
           </td></tr>
           </table><br>
           </form>
