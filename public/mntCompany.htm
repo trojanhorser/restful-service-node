@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1"/>
+<html>
+<head>
+	<script type='text/JavaScript' src='standardjs.js'></script>
+	<script type='text/JavaScript' src='standardsq.js'></script>
+	<script type='text/JavaScript' src='startup.js'></script>
+	<script type='text/JavaScript' src='dataDictionary.js'></script>
+  <script type='text/JavaScript' src='http://underscorejs.org/underscore-min.js'></script>
+	<link rel=stylesheet type='text/css' href='standardss.css'></link>
+
+<script>
+function loadUp() {
+
+changemode=false;
+savedata='';
+lastcrow=-1;
+
+fullsql="select compcode,compname,compaddr,comptele,compfax,compemail,compcontact,complogo,lrcpno,linvno,lgpno,lcdnno,taxno,tccno,trnno,lrcpvariance,uprcpvariance from company";
+  if (!allowadd){
+  removeElement('newbutton');
+  }
+  if (!allowchange){
+  removeElement('changebutton');
+  }
+  if (!allowdelete){
+  removeElement('deletebutton');
+  }
+
+  //changeContent('screen1table',applyTableDef(table1));
+  hideElement('bottomrightdata');
+  showElement('displayarea');
+
+}
+
+function refreshTable1() {
+  if (cancelForDataUpdate()) {return}
+   table1.sqlselect="select compcode,compname from company";
+   changeContent('screen1table',applyTableDef(table1));
+   hideElement('bottomrightdata');
+}
+
+function table1Clicked() {
+  crowprevious=lastcrow;
+  readClickedRow();
+ if (eof) return;
+ if (cancelForDataUpdate()) {return}
+ lastcrow=currentrow;
+
+ getRecord();
+
+ showElement('editbutton','bottomrightdata','deletebutton');
+ protect('*form:dataform');
+ hideElement('savebutton');
+}
+
+function getRecord() {
+  
+  var companyCode = numValueOfCol("companycode");
+  
+  var ajaxresponse = ajaxRequest("http://localhost:5000/api/company","compcode="+companyCode,"","GET");  
+ 
+  var company = JSON.parse(ajaxresponse)[0];
+  
+ 
+  changeVar('compcode',edit(numeric(company.compcode),0,'J'));
+  changeVar('compname',company.compname);  
+  changeVar('compaddr',company.compaddr);
+  changeVar('comptele',company.comptele);
+  changeVar('compfax',company.compfax);
+  changeVar('compemail',company.compemail);
+  changeVar('compcontact',company.compcontact);
+  changeVar('complogo',company.complogo);
+  changeVar('taxno',company.taxno);
+  changeVar('tccno',company.tccno);
+  changeVar('trnno',company.trnno);
+  changeVar('lrcpvariance',edit(numeric(company.lrcpvariance),2,'J'));
+  changeVar('uprcpvariance',edit(numeric(company.uprcpvariance),2,'J'));
+  changeVar('lrcpno',edit(numeric(company.lrcpno),0,'J'));
+  changeVar('linvno',edit(numeric(company.linvno),0,'J'));
+  changeVar('lgpno',edit(numeric(company.lgpno),0,'J'));
+  changeVar('lcdnno',edit(numeric(company.lcdnno),0,'J'));
+  return true;
+}
+
+function cancelForDataUpdate() {
+  var saverow=currentrow;
+  if (changemode && savedata.hasChangedVar()) {
+     if (!window.confirm('Do you wish to save the data that was changed on the last record?   Click OK to Save the data and continue...or Click Cancel to return to the data screen')) {
+         posTabCursor('table1',crowprevious);
+         readRow();
+         if (!eof) {
+            cancelRowClick();
+            setRowAsClicked();
+            return true;
+         }
+     }
+     else {
+        posTabCursor('table1',crowprevious);
+        readRow();
+        if (!doChange()) {
+            posTabCursor('table1',crowprevious);
+            readRow();
+            if (!eof) {
+               cancelRowClick();
+               setRowAsClicked();
+               return true;
+            }
+        }
+        posTabCursor('table1',saverow);
+        readRow();
+     }
+ }
+ return false;
+}
+
+function newRecord() {
+  if (cancelForDataUpdate()) {return}
+  unClickTable('table1');
+  showElement('bottomrightdata');
+  unProtect('*form:dataform');
+  clearForm('dataform');
+  hideElement('deletebutton','editbutton');
+  showElement('savebutton');
+  focusOn('compcode');
+}
+
+function doEdit() {
+  changemode=true;
+  unProtect('*form:dataform');
+  savedata=new saveVar('*form:dataform');
+  protect('compcode');
+  hideElement('deletebutton');
+  showElement('savebutton');
+  hideElement('editbutton');
+  focusOn('compname');
+}
+
+function doSave() {
+  if (changemode) {
+      if (doChange()) {hideElement('bottomrightdata');}
+  }
+  else {
+    doAdd();
+  }
+}
+
+function doCancel() {
+ changemode=false;
+ hideElement('bottomrightdata');
+}
+
+function validData1() {
+
+  if (isBlank(valueOf('compcode'))) {
+      alarm('Enter Company Code');
+      focusOn('compcode');
+      return false;
+  }
+
+
+  if (isBlank(valueOf('compname'))) {
+      alarm('Enter Company Name');
+      focusOn('compname');
+      return false;
+  }
+
+
+  if (changemode) {
+    var sqltxt;
+    var nbr;
+
+    if (savedata.hasChangedVar('lrcpno')) {
+        sqltxt="select max(rcpnbr) as rcpno from wsrcphead where compcode = " + sqlValueOf('compcode');
+        if (!sqlSelect(sqltxt,'$s',1)) {alarm(sqlerr); return false}
+        if (sqlrcdcnt>0) {
+           //nbr = '' + $s.rcpno[0];
+           //nbr = numeric(nbr.substr(4,7));
+           nbr=numeric($s.rcpno[0]);
+           if (nbr > numValueOf('lrcpno')) {
+             alarm('Receipt number greater than '+numValueOf('lrcpno')+' already exists');
+             focusOn('lrcpno');
+             return false;
+           }
+        }
+    }
+
+    if (savedata.hasChangedVar('linvno')) {
+        sqltxt="select max(invnbr) as invno from wsinvhead where compcode = " + sqlValueOf('compcode');
+        if (!sqlSelect(sqltxt,'$s',1)) {alarm(sqlerr); return false}
+        if (sqlrcdcnt>0) {
+           //nbr = '' + $s.invno[0];
+           //nbr = numeric(nbr.substr(4,7));
+           nbr=numeric($s.invno[0]);
+           if (nbr > numValueOf('linvno')) {
+             alarm('Invoice number greater than '+numValueOf('linvno')+' already exists');
+             focusOn('linvno');
+             return false;
+           }
+        }
+     }
+
+     if (savedata.hasChangedVar('lcdnno')) {
+        sqltxt="select max(cdnnbr) as cdnno from wscdnhead where compcode = " + sqlValueOf('compcode');
+        if (!sqlSelect(sqltxt,'$s',1)) {alarm(sqlerr); return false}
+        if (sqlrcdcnt>0) {
+           //nbr = '' + $s.cdnno[0];
+           //nbr = numeric(nbr.substr(4,7));
+           nbr=numeric($s.cdnno[0]);
+           if (nbr > numValueOf('lcdnno')) {
+             alarm('Credit Note number greater than '+numValueOf('lcdnno')+' already exists');
+             focusOn('lcdnno');
+             return false;
+           }
+        }
+     }
+
+     if (savedata.hasChangedVar('lgpno')) {
+        sqltxt="select max(gpno) as lgno from wsgphead where compcode = " + sqlValueOf('compcode');
+        if (!sqlSelect(sqltxt,'$s',1)) {alarm(sqlerr); return false}
+        if (sqlrcdcnt>0) {
+           //nbr = '' + $s.lgno[0];
+           //nbr = numeric(nbr.substr(4,7));
+           nbr=numeric($s.lgno[0]);
+           if (nbr > numValueOf('lgpno')) {
+             alarm('Gatepass Number greater than '+numValueOf('lgpno')+' already exists');
+             focusOn('lgpno');
+             return false;
+           }
+        }
+     }
+
+  }
+  return true;
+}
+
+function doAdd() {
+  if (!validData1()) return false;
+  var $updobj= new sqlUpdateObj('*form:dataform');
+  if (sqlInsert('company', $updobj)) {
+     newRow('table1');
+     updateTable1();
+     positionRow();
+     hideElement('bottomrightdata');
+     return true;
+  }
+  else {
+     alarm('Error..'+sqlerr);
+     return false;
+  }
+}
+
+function doChange() {
+  if (!savedata.hasChangedVar()) {
+      return true;
+  }
+  if (!validData1()) return;
+  var company = savedata.returnChangedVar();
+  var ajaxresponse = ajaxRequest("http://localhost:5000/api/company/575aeae12bdc68fc456bb2f8","",company,"PATCH");  
+  createTableFromJsonRequest();
+}
+
+function doDelete() {
+  if (!window.confirm('Do you wish to delete this record?')) {return}
+  var sqltxt="select compcode from wsshprpt where compcode="+numValueOfCol('t#compcode');
+  if (!sqlSelect(sqltxt,'$cc',1)) {alarm(sqlerr); return false}
+  if (sqlrcdcnt>0) {
+      alarm('Company cannot be deleted as it is present on one or more voyages');
+	  return false;
+  }
+  var $sqlwhere=buildSqlWhere();
+  if (sqlDelete('company',$sqlwhere)) {
+     deleteRow();
+     hideElement('bottomrightdata');
+  }
+  else {
+     alarm('Error..'+sqlerr);
+     return false;
+  }
+  return true;
+}
+
+function updateTable1() {
+  changeCol('t#compcode',valueOf('compcode'));
+  changeCol('t#compname',valueOf('compname'));
+  return;
+}
+
+
+
+</script>
+
+</head>
+<body onload=exeFunction('loadUp()')>
+
+<div id=displayarea style="width:100%; height:100%; display:none;">
+     <div id=pageheader style="height:10px;">
+     </div>
+
+     <div id=pagebottomleft style="width:383px;">
+          <div id=bottomleftdata>
+
+               <div id=screen1table></div>
+               <div id=screen2table></div>
+               <br>
+               <span button=newbutton type=new onClick='newRecord()'></span>
+               <span button=refreshbutton type=refresh onClick="exeFunction('refreshTable1()')"></span>
+
+          </div>
+     </div>
+
+     <div id=pagebottomright style="text-align:center;" >
+          <div id=bottomrightdata style="text-align:left;">
+
+          <div class=buttonarea>
+          <span button=editbutton type=edit onclick="exeFunction('doEdit()')"></span>
+          <span button=savebutton type=save onclick="exeFunction('doSave()')"></span>
+          <span button=deletebutton type=delete onclick="exeFunction('doDelete()')"></span>
+          <span button=cancelbutton type=cancel onclick="doCancel()"></span>
+          </div>
+          <br>
+          <form name=dataform>
+          <table cellpadding=4>
+          <tr><td>
+           <span field=compcode></span>
+          </td></tr><tr><td>
+           <span field=compname></span>
+          </td></tr><tr><td>
+           <span field=compaddr></span>
+          </td></tr><tr><td>
+           <span field=comptele></span>
+          </td></tr><tr><td>
+           <span field=compfax></span>
+          </td></tr><tr><td>
+           <span field=compemail></span>
+		   </td></tr><tr><td>
+           <span field=complogo></span>
+          </td></tr><tr><td>
+           <span field=compcontact></span>
+          </td></tr><tr><td>
+           <span field=taxno upper></span>
+          </td></tr><tr><td>
+           <span field=tccno upper></span>
+          </td></tr><tr><td>
+           <span field=trnno upper></span>
+          </td></tr><tr><td>
+           <span field=lrcpvariance></span>
+          </td></tr><tr><td>
+           <span field=uprcpvariance></span>
+					</td></tr><tr><td>
+					 <span field=lrcpno></span>
+          </td></tr><tr><td>
+           <span field=linvno></span>
+          </td></tr><tr><td>
+           <span field=lgpno></span>
+          </td></tr><tr><td>
+           <span field=lcdnno></span>
+          </td></tr>
+          </table><br>
+          </form>
+
+          </div>
+     </div>
+
+</div>
+</body>
+
+<script>
+createTableFromJsonRequest();
+
+function createTableFromJsonRequest(){
+  
+  var ajaxresponse = ajaxRequest("http://localhost:5000/api/company","","","GET");  
+   
+  if(ajaxresponse != undefined || ajaxresponse.length > 0){
+    
+    var companies = JSON.parse(ajaxresponse);
+   
+    //Get keys for first element in the array
+    var attributes =  _.keys(companies[0]);
+     
+    var tabl2=new tableDef();
+    tabl2.tableid='table44';
+    tabl2.tableonclick='table1Clicked()';
+    tabl2.column('number').width=200;
+    tabl2.column('name').align = 'center';
+    tabl2.height=400;
+
+   //var tdata = new sqlSelectResult(attributes[_.indexOf(attributes, "compcode")], attributes[_.indexOf(attributes, "compname")]); 
+   
+   var tdata = new sqlSelectResult("companycode", "companyname"); 
+   
+    
+   for (var x = 0; x < companies.length; x++) {
+      console.log(companies);
+      n=addSqlSelectRow(tdata);
+      tdata.companycode[n]=companies[x].compcode;
+      tdata.companyname[n]=companies[x].compname;
+  }
+  
+  setSqlSelectResult(tabl2,tdata);
+  changeContent('screen2table',applyTableDef(tabl2));
+
+  }
+}
+
+</script>
+</html>

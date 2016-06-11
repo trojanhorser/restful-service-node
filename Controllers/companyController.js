@@ -26,6 +26,7 @@ var companyController = function(Company){
   }
   
   var companyRouterMiddleWear = function(req,res,next){
+      
    Company.findById(req.params.companyId, function(err,company){
        if(err){
            res.status(500).send(err);
@@ -49,8 +50,7 @@ var update = function(req,res){
     req.company.telephone = req.body.telephone;
     req.company.fax = req.body.email;
     req.company.logo = req.body.contact;
-    req.company.taxNumber = req.body.taxNumber;
-    req.company.tccNumber = req.body.tccNumber;
+     req.company.tccNumber = req.body.tccNumber;
     req.company.trnNumber = req.body.trnNumber;
     req.company.shortPaymentVariance = req.body.shortPaymentVariance;
     req.company.excessPaymentVariance = req.body.excessPaymentVariance;
@@ -75,17 +75,15 @@ var patch = function(req,res){
           delete req.body._id;
       }
       
-      for(var key in req.body){
-          
-          req.company[key] = req.body[key];
+      for(var key in req.body.json){
+          console.log(req.body.json[key]);
+          req.company[key] = req.body.json[key];     
       }
-        
+     
       req.company.save(function(err){
         if(err){
             res.status(500).send(err);
         }else{
-            //res.setHeader("Access-Control-Allow-Origin", "*");
-            //res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With");
             res.json(req.company);
         }            
       });      
