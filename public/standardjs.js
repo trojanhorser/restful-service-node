@@ -6373,10 +6373,22 @@ function ajaxCall(pgm,urlp){
 function ajaxRequest(pgm,urlp,json,requestType){
  var dontwait=false;
  ajaxerror='';
- var ajaxresponse='';
+ var ajaxresponse=null;
+ 
+ var onreadyStateChangeHandler = function(){
+          
+    if (xmlHttp.readyState == 4) {
+        if (xmlHttp.status != 200) {
+            ajaxerror=xmlHttp.statusText;
+        }
+        if (xmlHttp.status == 200) {
+            ajaxresponse = xmlHttp.responseText;
+        }
+    }      
+ };
  
  try {
-    if (requestType==="GET") {
+    if (requestType == "GET") {
       
       var  inpath = "";
       
@@ -6385,63 +6397,32 @@ function ajaxRequest(pgm,urlp,json,requestType){
       }else{
          inpath=pgm;
       }
+      
       xmlHttp.open("GET", inpath, dontwait);
-      xmlHttp.onreadystatechange = function(){
-          
-            if (xmlHttp.readyState == 4) {
-                if (xmlHttp.status != 200) {
-                    ajaxerror=xmlHttp.statusText;
-                }
-                if (xmlHttp.status == 200) {
-                    ajaxresponse = xmlHttp.responseText;
-                }
-            }      
-      };
+      xmlHttp.onreadystatechange = onreadyStateChangeHandler;
       xmlHttp.send(null);
     }
     
     
-    if (requestType=="POST") {
+    if (requestType == "POST" || requestType == "PATCH" ) {
         
-      xmlHttp.open("POST",pgm,dontwait);
+      xmlHttp.open(requestType,pgm,dontwait);
       
-      xmlHttp.onreadystatechange = function(){
-          
-            if (xmlHttp.readyState == 4) {
-                if (xmlHttp.status != 200) {
-                    ajaxerror=xmlHttp.statusText;
-                }
-                if (xmlHttp.status == 200) {
-                    ajaxresponse = xmlHttp.responseText;
-                }
-            }      
-      };
+      xmlHttp.onreadystatechange = onreadyStateChangeHandler;
       
       xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       xmlHttp.send(JSON.stringify(json));
     }
     
-    
-    if (requestType=="PATCH") {
+    if (requestType == "DELETE" ) {
         
-      xmlHttp.open("PATCH",pgm, dontwait);
+      xmlHttp.open(requestType,pgm,dontwait);
       
-      xmlHttp.onreadystatechange = function(){
-          
-            if (xmlHttp.readyState == 4) {
-                if (xmlHttp.status != 200) {
-                    ajaxerror=xmlHttp.statusText;
-                }
-                if (xmlHttp.status == 200) {
-                    ajaxresponse = xmlHttp.responseText;
-                }
-            }      
-      };
-        
-      xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*");
-      xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-      xmlHttp.send(JSON.stringify(json));
+      xmlHttp.onreadystatechange = onreadyStateChangeHandler;
+      
+      xmlHttp.send(null);
     }
+    
  }
  catch (e){
       ajaxerror='Unspecified error on ajaxCall function\n'+e.message;
@@ -6451,13 +6432,6 @@ function ajaxRequest(pgm,urlp,json,requestType){
  
  return ajaxresponse;
 }
-
-function ajaxRequestReturn() {
-    
-  var ajaxresponse;
-  
-
-} 
 
 
 

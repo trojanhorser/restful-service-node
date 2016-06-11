@@ -16,7 +16,6 @@ changemode=false;
 savedata='';
 lastcrow=-1;
 
-fullsql="select compcode,compname,compaddr,comptele,compfax,compemail,compcontact,complogo,lrcpno,linvno,lgpno,lcdnno,taxno,tccno,trnno,lrcpvariance,uprcpvariance from company";
   if (!allowadd){
   removeElement('newbutton');
   }
@@ -27,7 +26,7 @@ fullsql="select compcode,compname,compaddr,comptele,compfax,compemail,compcontac
   removeElement('deletebutton');
   }
 
-  //changeContent('screen1table',applyTableDef(table1));
+ 
   hideElement('bottomrightdata');
   showElement('displayarea');
 
@@ -166,72 +165,6 @@ function validData1() {
       return false;
   }
 
-
-  if (changemode) {
-    var sqltxt;
-    var nbr;
-
-    if (savedata.hasChangedVar('lrcpno')) {
-        sqltxt="select max(rcpnbr) as rcpno from wsrcphead where compcode = " + sqlValueOf('compcode');
-        if (!sqlSelect(sqltxt,'$s',1)) {alarm(sqlerr); return false}
-        if (sqlrcdcnt>0) {
-           //nbr = '' + $s.rcpno[0];
-           //nbr = numeric(nbr.substr(4,7));
-           nbr=numeric($s.rcpno[0]);
-           if (nbr > numValueOf('lrcpno')) {
-             alarm('Receipt number greater than '+numValueOf('lrcpno')+' already exists');
-             focusOn('lrcpno');
-             return false;
-           }
-        }
-    }
-
-    if (savedata.hasChangedVar('linvno')) {
-        sqltxt="select max(invnbr) as invno from wsinvhead where compcode = " + sqlValueOf('compcode');
-        if (!sqlSelect(sqltxt,'$s',1)) {alarm(sqlerr); return false}
-        if (sqlrcdcnt>0) {
-           //nbr = '' + $s.invno[0];
-           //nbr = numeric(nbr.substr(4,7));
-           nbr=numeric($s.invno[0]);
-           if (nbr > numValueOf('linvno')) {
-             alarm('Invoice number greater than '+numValueOf('linvno')+' already exists');
-             focusOn('linvno');
-             return false;
-           }
-        }
-     }
-
-     if (savedata.hasChangedVar('lcdnno')) {
-        sqltxt="select max(cdnnbr) as cdnno from wscdnhead where compcode = " + sqlValueOf('compcode');
-        if (!sqlSelect(sqltxt,'$s',1)) {alarm(sqlerr); return false}
-        if (sqlrcdcnt>0) {
-           //nbr = '' + $s.cdnno[0];
-           //nbr = numeric(nbr.substr(4,7));
-           nbr=numeric($s.cdnno[0]);
-           if (nbr > numValueOf('lcdnno')) {
-             alarm('Credit Note number greater than '+numValueOf('lcdnno')+' already exists');
-             focusOn('lcdnno');
-             return false;
-           }
-        }
-     }
-
-     if (savedata.hasChangedVar('lgpno')) {
-        sqltxt="select max(gpno) as lgno from wsgphead where compcode = " + sqlValueOf('compcode');
-        if (!sqlSelect(sqltxt,'$s',1)) {alarm(sqlerr); return false}
-        if (sqlrcdcnt>0) {
-           //nbr = '' + $s.lgno[0];
-           //nbr = numeric(nbr.substr(4,7));
-           nbr=numeric($s.lgno[0]);
-           if (nbr > numValueOf('lgpno')) {
-             alarm('Gatepass Number greater than '+numValueOf('lgpno')+' already exists');
-             focusOn('lgpno');
-             return false;
-           }
-        }
-     }
-
-  }
   return true;
 }
 
@@ -282,21 +215,13 @@ function doChange() {
 
 function doDelete() {
   if (!window.confirm('Do you wish to delete this record?')) {return}
-  var sqltxt="select compcode from wsshprpt where compcode="+numValueOfCol('t#compcode');
-  if (!sqlSelect(sqltxt,'$cc',1)) {alarm(sqlerr); return false}
-  if (sqlrcdcnt>0) {
-      alarm('Company cannot be deleted as it is present on one or more voyages');
-	  return false;
-  }
-  var $sqlwhere=buildSqlWhere();
-  if (sqlDelete('company',$sqlwhere)) {
-     deleteRow();
-     hideElement('bottomrightdata');
-  }
-  else {
-     alarm('Error..'+sqlerr);
-     return false;
-  }
+  
+  var uniqueid = valueOf("uniqueid");
+  
+  var ajaxresponse = ajaxRequest("http://localhost:5000/api/company/"+uniqueid,"","","DELETE");  
+  
+  createTableFromJsonRequest();
+  
   return true;
 }
 
