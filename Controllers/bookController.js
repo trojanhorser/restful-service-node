@@ -89,7 +89,47 @@ var removeBook = function(req,res){
       });
   }
 
+var bubbleSort = function(){
+    
+    for (var a=[],i=0;i < 200000;++i) a[i]=i;
 
+        function shuffle(array) {
+        var tmp, current, top = array.length;
+        if(top) while(--top) {
+            current = Math.floor(Math.random() * (top + 1));
+            tmp = array[current];
+            array[current] = array[top];
+            array[top] = tmp;
+        }
+        return array;
+        }
+
+        a = shuffle(a); 
+        
+        function bubbleSort(a)
+        {
+            var swapped;
+            do {
+                swapped = false;
+                for (var i=0; i < a.length-1; i++) {
+                    if (a[i] > a[i+1]) {
+                        var temp = a[i];
+                        a[i] = a[i+1];
+                        a[i+1] = temp;
+                        swapped = true;
+                    }
+                }
+            } while (swapped);
+        }
+
+        console.log("Start: " + new Date().toLocaleTimeString('en-US', { hour12: false, 
+                                                    hour: "numeric",                                                     minute: "numeric"}))
+        bubbleSort(a);
+
+        console.log("End: " + new Date().toLocaleTimeString('en-US', { hour12: false, 
+                                                    hour: "numeric", 
+                                                    minute: "numeric"}))   
+}
    
   return {
       post: post,
@@ -98,7 +138,8 @@ var removeBook = function(req,res){
       getById: getById,
       update: update,
       patch: patch,
-      removeBook: removeBook
+      removeBook: removeBook,
+      bubbleSort: bubbleSort
     }  
 }
 

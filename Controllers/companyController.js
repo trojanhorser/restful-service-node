@@ -11,10 +11,7 @@ var companyController = function(Company){
       
       var query = req.query;
       
-      if(req.query.genre){
-          query.genre = req.query.genre;
-      }
-           
+       
       Company.find(query,function(error,companys){
           if(error){
               console.log('Error')
@@ -101,8 +98,7 @@ var removeCompany = function(req,res){
           }
       });
   }
-
-
+       
    
   return {
       post: post,
